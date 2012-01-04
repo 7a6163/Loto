@@ -8,6 +8,7 @@
 // ==/UserScript==
 
 function main() {
+    //複寫原有的顯示賠率方法
     window.oddsChangeDisplay = function(gameType ,matchID) {
         var trObj=document.getElementById("odds_display_"+gameType+"_"+matchID);
         if (trObj.style.display == "none"){
@@ -22,7 +23,7 @@ function main() {
             }
         }
     }
-
+    //複寫原有的顯示全部賠率
     window.oddsChangeAll = function() {
         var allImgObj = document.getElementById('btn_displayodds');
         var openCheck_cnfArray = document.getElementsByName('openCheck_cnf');
@@ -58,36 +59,29 @@ function main() {
         } 
     }
 }
+
+//解決Chrome 不支援 unsafewindow
 var script = document.createElement('script');
 script.appendChild(document.createTextNode('('+ main +')();'));
 (document.body || document.head || document.documentElement).appendChild(script);
 
+//增加Firefox 支援 正確比分
 var middlearea = document.getElementById("middlearea");
 middlearea.onload = function(){
     var imgCheck = middlearea.contentDocument.getElementsByName("betCheck_CRS_img");
-    //console.log(imgCheck.length);
     for (var i=0; i<imgCheck.length; i++) {
         var strCheck = imgCheck[i].getAttribute("onclick");
-        //console.log(strCheck);
         var pattermCheck = /betCheck_CRS_\d+/;
         var regexped = '"'+ strCheck.match(pattermCheck)[0]+'"';
-        //console.log('"'+ strCheck.match(regepCheck)[0]+'"');
         var replaced = strCheck.replace(pattermCheck,regexped);
-        //console.log(imgCheck[i].getAttribute.replace(/betCheck_CRS_\d+/,\"+ regepCheck +\"));
-        //console.log(replaced);
-        //imgCheck[i].removeAttribute("onclick");
         imgCheck[i].setAttribute("onclick",replaced);
     }
 }
 
-
+//完成載入頁面後，調整iframe高度
 window.onload = function(){
     var iframeHeight = middlearea.contentDocument.documentElement.scrollHeight;
     middlearea.style.height = iframeHeight > 480 ? iframeHeight + 100 + "px" : "480px";
-    var imgCheck = middlearea.contentDocument.getElementsByName("betCheck_CRS_img");
-    for (var i=0; i<imgCheck.length; i++) {
-        imgCheck[i].onclick = alert('XD');
-    }
 }
 
 function setOddsOpen(gameType ,matchID){
