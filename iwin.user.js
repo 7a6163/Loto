@@ -4,21 +4,20 @@
 // @description     修正官方網站不想解決的問題
 // @include         https://bet.i-win.com.tw/SBP2Web/*
 // @auther          Zac
-// @version         0.3
+// @version         0.4
 // ==/UserScript==
 
-function main(){
+function main() {
     window.oddsChangeDisplay = function(gameType ,matchID) {
-        alert('XD');
         var trObj=document.getElementById("odds_display_"+gameType+"_"+matchID);
         if (trObj.style.display == "none"){
             setOddsOpen(gameType ,matchID);
             parent.document.getElementById('middlearea').style.height = document.documentElement.scrollHeight + 80 + "px";
-        }else {
+        } else {
             setOddsClose(gameType ,matchID);
             if (document.body.scrollHeight < 440){
                 parent.document.getElementById('middlearea').style.height = "460px";
-            }else {
+            } else {
                 parent.document.getElementById('middlearea').style.height =document.documentElement.scrollHeight + 20 + "px";
             }
         }
@@ -59,15 +58,36 @@ function main(){
         } 
     }
 }
-
 var script = document.createElement('script');
 script.appendChild(document.createTextNode('('+ main +')();'));
 (document.body || document.head || document.documentElement).appendChild(script);
 
 var middlearea = document.getElementById("middlearea");
+middlearea.onload = function(){
+    var imgCheck = middlearea.contentDocument.getElementsByName("betCheck_CRS_img");
+    //console.log(imgCheck.length);
+    for (var i=0; i<imgCheck.length; i++) {
+        var strCheck = imgCheck[i].getAttribute("onclick");
+        //console.log(strCheck);
+        var pattermCheck = /betCheck_CRS_\d+/;
+        var regexped = '"'+ strCheck.match(pattermCheck)[0]+'"';
+        //console.log('"'+ strCheck.match(regepCheck)[0]+'"');
+        var replaced = strCheck.replace(pattermCheck,regexped);
+        //console.log(imgCheck[i].getAttribute.replace(/betCheck_CRS_\d+/,\"+ regepCheck +\"));
+        //console.log(replaced);
+        //imgCheck[i].removeAttribute("onclick");
+        imgCheck[i].setAttribute("onclick",replaced);
+    }
+}
+
+
 window.onload = function(){
     var iframeHeight = middlearea.contentDocument.documentElement.scrollHeight;
     middlearea.style.height = iframeHeight > 480 ? iframeHeight + 100 + "px" : "480px";
+    var imgCheck = middlearea.contentDocument.getElementsByName("betCheck_CRS_img");
+    for (var i=0; i<imgCheck.length; i++) {
+        imgCheck[i].onclick = alert('XD');
+    }
 }
 
 function setOddsOpen(gameType ,matchID){
