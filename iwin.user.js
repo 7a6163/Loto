@@ -6,4 +6,7 @@
 // @version         0.1
 // ==/UserScript==
 
-document.getElementById("middlearea").height = "800";
+var middlearea = document.getElementById("middlearea"); 
+window.onload = function(){
+        middlearea.style.height = middlearea.contentDocument.documentElement.scrollHeight + 20 + "px";
+}
