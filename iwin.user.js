@@ -9,5 +9,5 @@
 var middlearea = document.getElementById("middlearea");
 window.onload = function(){
     var height = middlearea.contentDocument.documentElement.scrollHeight;
-    middlearea.style.height = height > 480 ? height + 20 + "px" : 480;
+    middlearea.style.height = iframeHeight > 480 ? iframeHeight + 20 + "px" : "480px";
 }
