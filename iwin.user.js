@@ -3,8 +3,9 @@
 // @namespace       iWin
 // @description     修正官方網站不想解決的問題
 // @include         https://bet.i-win.com.tw/SBP2Web/*
+// @include         http://www.i-win.com.tw/*
 // @auther          Zac
-// @version         0.4
+// @version         0.6
 // ==/UserScript==
 
 function main() {
@@ -79,10 +80,25 @@ middlearea.onload = function(){
 }
 
 //完成載入頁面後，調整iframe高度
-window.onload = function(){
+//window.onload = function(){
+//    var iframeHeight = middlearea.contentDocument.documentElement.scrollHeight;
+//    middlearea.style.height = iframeHeight > 480 ? iframeHeight + 100 + "px" : "480px";
+//}
+
+//修正賠率顯示問題
+middlearea.onload = function() {
     var iframeHeight = middlearea.contentDocument.documentElement.scrollHeight;
     middlearea.style.height = iframeHeight > 480 ? iframeHeight + 100 + "px" : "480px";
 }
+
+//修正熱門賽事的顯示
+var hotmatchid = document.getElementById("hotmatchid");
+hotmatchid.onload = function() {
+    var hotHeight =  hotmatchid.contentDocument.documentElement.scrollHeight;
+    hotmatchid.style.height = hotHeight > 365 ? hotHeight + 50 + "px" : "365px";
+}
+
+
 
 function setOddsOpen(gameType ,matchID){
     var imgObj = document.getElementById("oddsBtn_"+gameType+"_"+matchID);
