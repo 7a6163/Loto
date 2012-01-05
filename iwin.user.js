@@ -5,7 +5,7 @@
 // @include         https://bet.i-win.com.tw/SBP2Web/*
 // @include         http://www.i-win.com.tw/*
 // @auther          Zac
-// @version         0.6
+// @version         0.6.1
 // ==/UserScript==
 
 function main() {
@@ -59,6 +59,11 @@ function main() {
             allImgObj.src = "img/display_allodds.gif";
         } 
     }
+
+    //預計要修正賽事結果
+    window.bodyLoad(){
+        document.getElementById("middlearea").location.href = "/SBP2Web/matchquery.do?method=matchResult&sportsId=1";
+    }
 }
 
 //解決Chrome 不支援 unsafewindow
@@ -69,6 +74,10 @@ script.appendChild(document.createTextNode('('+ main +')();'));
 //增加Firefox 支援 正確比分
 var middlearea = document.getElementById("middlearea");
 middlearea.onload = function(){
+    //高度修正
+    var iframeHeight = middlearea.contentDocument.documentElement.scrollHeight;
+    middlearea.style.height = iframeHeight > 480 ? iframeHeight + 100 + "px" : "480px";
+
     var imgCheck = middlearea.contentDocument.getElementsByName("betCheck_CRS_img");
     for (var i=0; i<imgCheck.length; i++) {
         var strCheck = imgCheck[i].getAttribute("onclick");
@@ -79,17 +88,6 @@ middlearea.onload = function(){
     }
 }
 
-//完成載入頁面後，調整iframe高度
-//window.onload = function(){
-//    var iframeHeight = middlearea.contentDocument.documentElement.scrollHeight;
-//    middlearea.style.height = iframeHeight > 480 ? iframeHeight + 100 + "px" : "480px";
-//}
-
-//修正賠率顯示問題
-middlearea.onload = function() {
-    var iframeHeight = middlearea.contentDocument.documentElement.scrollHeight;
-    middlearea.style.height = iframeHeight > 480 ? iframeHeight + 100 + "px" : "480px";
-}
 
 //修正熱門賽事的顯示
 var hotmatchid = document.getElementById("hotmatchid");
