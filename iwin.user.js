@@ -61,7 +61,7 @@ function main() {
     }
 
     //預計要修正賽事結果
-    window.bodyLoad(){
+    window.bodyLoad = function() {
         document.getElementById("middlearea").location.href = "/SBP2Web/matchquery.do?method=matchResult&sportsId=1";
     }
 }
@@ -73,8 +73,8 @@ script.appendChild(document.createTextNode('('+ main +')();'));
 
 //增加Firefox 支援 正確比分
 var middlearea = document.getElementById("middlearea");
-middlearea.onload = function(){
-    //高度修正
+middlearea.onload = function() {
+    //修正高度
     var iframeHeight = middlearea.contentDocument.documentElement.scrollHeight;
     middlearea.style.height = iframeHeight > 480 ? iframeHeight + 100 + "px" : "480px";
 
