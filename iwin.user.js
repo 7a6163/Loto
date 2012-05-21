@@ -5,29 +5,34 @@
 // @include         https://bet.i-win.com.tw/SBP2Web/*
 // @include         http://www.i-win.com.tw/*
 // @auther          Zac
-// @version         0.7
+// @version         0.7.1
 // ==/UserScript==
 
 function main() {
     //複寫原有的顯示賠率方法
     window.oddsChangeDisplay = function (gameType, matchID) {
-        var trObj = document.getElementById("odds_display_" + gameType + "_" + matchID);
+        var trObj = document.getElementById("odds_display_" + gameType + "_" + matchID),
+			middle = parent.document.getElementById('middlearea');
         if (trObj.style.display === "none") {
             setOddsOpen(gameType, matchID);
-            parent.document.getElementById('middlearea').style.height = document.documentElement.scrollHeight + 80 + "px";
+            middle.style.height = document.documentElement.scrollHeight + 80 + "px";
         } else {
             setOddsClose(gameType, matchID);
             if (document.documentElement.scrollHeight < 440) {
-                parent.document.getElementById('middlearea').style.height = "460px";
+                middle.style.height = "460px";
             } else {
-                parent.document.getElementById('middlearea').style.height = document.documentElement.scrollHeight + 20 + "px";
+               middle.style.height = document.documentElement.scrollHeight + 20 + "px";
             }
         }
     };
     //複寫原有的顯示全部賠率
-    window.oddsChangeAll = function() {
-        var allImgObj, openCheck_cnfArray, openCheck_uncnfArray, matchID, i;
-        allImgObj = document.getElementById('btn_displayodds');
+    window.oddsChangeAll = function () {
+        var allImgObj = document.getElementById('btn_displayodds');,
+			openCheck_cnfArray, 
+			openCheck_uncnfArray, 
+			matchID, 
+			i = 0;
+			
         openCheck_cnfArray = document.getElementsByName('openCheck_cnf');
         openCheck_uncnfArray = document.getElementsByName('openCheck_uncnf');
         //全部展開
@@ -76,7 +81,13 @@ script.appendChild(document.createTextNode('(' + main + ')();'));
 var middlearea = document.getElementById("middlearea");
 middlearea.onload = function () {
     'use strict';
-    var iframeHeight, imgCheck, i, strCheck, pattermCheck, regexped, replaced;
+    var iframeHeight,
+		imgCheck,
+		i = 0,
+		strCheck,
+		pattermCheck,
+		regexped, 
+		replaced;
     //修正高度
     iframeHeight = middlearea.contentDocument.documentElement.scrollHeight;
     middlearea.style.height = iframeHeight > 480 ? iframeHeight + 100 + "px" : "480px";
