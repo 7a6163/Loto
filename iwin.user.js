@@ -5,7 +5,7 @@
 // @include         https://bet.i-win.com.tw/SBP2Web/*
 // @include         http://www.i-win.com.tw/*
 // @auther          Zac
-// @version         0.7.1
+// @version         0.9
 // ==/UserScript==
 
 function main() {
@@ -31,18 +31,14 @@ function main() {
     window.oddsChangeAll = function () {
         'use strict';
         var allImgObj = document.getElementById('btn_displayodds'),
-			openCheck_cnfArray, 
-			openCheck_uncnfArray, 
+			openCheck_cnfArray = document.getElementsByName('openCheck_cnf'), 
+			openCheck_uncnfArray = document.getElementsByName('openCheck_uncnf'), 
 			matchID, 
 			i = 0,
 			max,
-			docElement,
-			middle;
-		
-		middle = parent.document.getElementById('middlearea');
-		docElement = document.documentElement;
-        openCheck_cnfArray = document.getElementsByName('openCheck_cnf');
-        openCheck_uncnfArray = document.getElementsByName('openCheck_uncnf');
+			docElement = document.documentElement,
+			middle = parent.document.getElementById('middlearea');
+
         //全部展開
         if (allImgObj.src.indexOf("img/display_allodds.gif") > -1) {
             for (i = 0, max = openCheck_cnfArray.length; i < max; i += 1) {
@@ -65,15 +61,216 @@ function main() {
                 matchID = openCheck_uncnfArray[i].value;
                 setOddsClose('uncnf', matchID);
             }
-            if (docElement.scrollHeight < 440){
+            if (docElement.scrollHeight < 440) {
                 middle.style.height = "460px";
             } else {
                 middle.style.height = docElement.scrollHeight + 20 + "px";
             }
             allImgObj.src = "img/display_allodds.gif";
-        } 
-    }
+        }
+    };
+    
+    
+    window.showAllUpCalcDlg = function (matchNum,matchPoolID,combination,poolCode) {
+	    if (poolCode === '') {
+			poolCode = document.getElementById("poolCode").value; //ALL
+		}
+		
+		var sportsCode = document.getElementById("sportCode").value; //FB
+		var dlgUrl = "calculate.do?method=allupList&sportsCode=" + sportsCode + "&poolCode=" + poolCode + "&matchNum="
+		+ matchNum + "&matchPoolID=" + matchPoolID + "&combination=" + combination;
+		// if ( betDescribe ){
+		// dlgUrl +="&betDescribe="+$('betDescribe_'+arguments[4]).innerHTML;
+		// }
+		var pos = "height=390,width=780,left=" + (screen.AvailWidth - 780) / 2 + ",top=" + (screen.AvailHeight - 390) / 2;
+		var dlg = window.open(dlgUrl, "newtab", pos + ",status=yes,toolbar=no,menubar=no,location=no,resizable=no");
+		//window.location = dlgUrl,null,pos + ",status=yes,toolbar=no,menubar=no,location=no,resizable=no";
+		dlg.focus(); 
+    };
 
+    window.initFormulas = function () {
+		var ajaxObj = {
+			url:'calculate.do?method=ajaxFormulaList',
+			method:'post',
+			success:function(result,request){
+				var formulas= Ext.util.JSON.decode(result.responseText);
+				var selObj = document.getElementById("formula");
+				selObj.options.length = 0;//清空数据
+				for (var i = 0; i < formulas.length; i++) {
+					var text = formulas[i]["formulaName"];
+					var value = formulas[i]["formulaName"];
+					var option = new Option(text, value);
+					//alert(option.text);
+					selObj.add(option, -1);
+				}
+			},
+			failure:function(result,request){
+				alert("ERROR:" + result.responseText);
+			}
+		}
+		Ext.Ajax.request(ajaxObj);
+	};
+
+	window.calcOk = function() {
+	 	  var formula = document.getElementById("formula").value;
+	 	  var singleMoney = document.getElementById("singleMoney").value;
+	 	  
+	 	  if (document.getElementById("betNumber").value === "") {
+				document.getElementById("betNumber").value 
+					= document.getElementById("formula").value.substring(document.getElementById("formula").value.indexOf("x") + 1);
+			}
+	 	  var betNumber = document.getElementById("betNumber").value;
+	 	  if(formula === ""){
+	 	  	alert("必須選擇過關模式!");
+	 	  	return;
+	 	  }
+	 	  if(singleMoney === "" || parseInt(singleMoney) === 0){
+	 	  	alert("必須輸入每組合金額,並且必須大於0!");
+	 	  	return;
+	 	  }
+	 	  //alert(singleMoney + " -- " +parseInt(singleMoney)%10);
+	 	  //if(parseInt(singleMoney)<100 || (parseInt(singleMoney)%10)!= 0 || parseInt(singleMoney)>100000){
+	 	  //if((parseInt(singleMoney)%10)!= 0){
+	 	  
+	 	  if((parseInt(singleMoney) % 10) != 0
+	 	  		|| (formula.substring(formula.indexOf("x") + 1) * singleMoney < 100)
+	 	  		|| (formula.substring(formula.indexOf("x") + 1) * singleMoney > 100000)){
+	 	    alert("每組合金額需為10的倍數，且總投注金額必須大於100，小於10萬");
+	 	  	tenInteger(document.getElementById("singleMoney"));
+	 	    return;
+	 	  }
+	 	  var ajaxObj = {
+	 	   	   url:'calculate.do?method=ajaxAllUpCalc',
+	 	   	   params:{formula:formula,singleMoney:singleMoney,betNumber:betNumber},
+	 	   	   method:'post',
+	 	   	   success:function(result,request){
+	 	   	   	  var calcRes= Ext.util.JSON.decode(result.responseText);
+	 	   	   	  if (typeof(calcRes)=="string"&&calcRes.indexOf("error:")!=-1){
+	 	   	   	  	alert("ERROR:"+calcRes.substring(calcRes.indexOf(":")+1));
+	 	   	   	  	return;
+	 	   	   	  }
+	 	   	   	  setCalcResValue(calcRes.totalBetNumber,calcRes.singleBetMoney,calcRes.totalBetMoney,
+	 	   	   	                  calcRes.winBetNumber,calcRes.winBetMoney,calcRes.payoffMoney);
+	 	   	   },
+	 	   	   failure:function(result,request){
+	 	   	   	alert("ERROR:" + result.responseText);
+	 	   	  }
+	 	  };
+	 	  Ext.Ajax.request(ajaxObj);
+	 }
+	 
+	window.setCalcResValue = function (totalBetNumber,singleBetMoney,totalBetMoney,winBetNumber,winBetMoney,payoffMoney) {
+		document.getElementById("td_totalBetNumber").innerHTML=totalBetNumber;
+		document.getElementById("td_singleBetMoney").innerHTML='NT$' + convert1000(singleBetMoney);
+		document.getElementById("td_totalBetMoney").innerHTML='NT$' + convert1000(totalBetMoney);
+		document.getElementById("td_winBetNumber").innerHTML= winBetNumber;
+		document.getElementById("td_winBetMoney").innerHTML='NT$' + convert1000(winBetMoney);
+		document.getElementById("td_payoffMoney").innerHTML='NT$' + convert1000(payoffMoney);
+	};
+	 
+	window.convert1000 = function (inValue) {
+		var value = "" + inValue;
+		if(value.length <= 3){
+			return value;
+		}
+		var len = value.length
+		var valueArr = [];
+		var result = "";
+		for(var i=1; len-(3 * i) > 0; i++){
+	  		valueArr[i-1] = value.substring(value.length - 3);
+	  		value = value.substring(0, value.length - 3);
+	  		if(value.length <= 3) {
+				valueArr[i] = value;
+				break;
+			}
+		}
+		for(var i = valueArr.length - 1; i >= 0; i--){
+			result += valueArr[i];
+			if(i != 0) {
+		      	result += ",";
+			}
+		}
+		return result;
+	};
+
+	window.successChecked = function (itemid,checked) {
+		var ajaxObj = {
+	 	   	   url:'calculate.do?method=ajaxAllUpSuccessChanged',
+	 	   	   params:{itemid:itemid,checked:checked},
+	 	   	   method:'post',
+	 	   	   success:function(result,request){
+	 	   	   	  var success= Ext.util.JSON.decode(result.responseText);
+	 	   	   },
+	 	   	   failure:function(result,request){
+	 	   	   	  alert("ERROR:" + result.responseText);
+	 	   	  }
+	 	  };
+	 	  Ext.Ajax.request(ajaxObj);
+	};
+	
+	window.changeBetNumber = function (formula) {
+	 	document.getElementById("betNumber").value = formula.substring(formula.indexOf("x") + 1);
+	 	//var matchBet = formula.substring(formula.indexOf("x")+1);
+	 	//document.getElementById("singleMoeny").value = formatMoney(100);
+	 	var singleMoney = document.getElementById("singleMoney").value;
+	 	var betNumber = document.getElementById("betNumber").value;
+	 	if(singleMoney === "" ) {
+	 	  	alert("必須輸入每組合金額,並且必須大於0!");
+	 	  	return;
+	 	  }
+	 	  //alert(singleMoney + " -- " +parseInt(singleMoney)%10);
+	 	  if((parseInt(singleMoney) % 10) !== 0
+	 	  		|| (formula.substring(formula.indexOf("x")+1) * singleMoney < 100)
+	 	  		|| (formula.substring(formula.indexOf("x")+1) * singleMoney > 100000)){
+	 	    alert("每組合金額需為10的倍數，且總投注金額必須大於100，小於10萬");
+	 	  	tenInteger(document.getElementById("singleMoney"));
+	 	    return;
+	 	  }
+	 	var ajaxObj = {
+	 	   	   url:'calculate.do?method=ajaxAllUpCalc',
+	 	   	   params:{formula:formula,singleMoney:singleMoney,betNumber:betNumber},
+	 	   	   method:'post',
+	 	   	   success:function(result,request){
+	 	   	   	  var calcRes= Ext.util.JSON.decode(result.responseText);
+	 	   	   	  if (typeof(calcRes) === "string" &&calcRes.indexOf("error:") !== -1){
+	 	   	   	  	alert("ERROR:" + calcRes.substring(calcRes.indexOf(":") + 1));
+	 	   	   	  	return;
+	 	   	   	  }
+	 	   	   	  setCalcResValue(calcRes.totalBetNumber,calcRes.singleBetMoney,calcRes.totalBetMoney,
+	 	   	   	                  calcRes.winBetNumber,calcRes.winBetMoney,calcRes.payoffMoney);
+	 	   	   },
+	 	   	   failure:function(result,request){
+	 	   	   	alert("ERROR:" + result.responseText);
+	 	   	  }
+	 	  };
+	 	  Ext.Ajax.request(ajaxObj);
+	 }
+	 
+	 
+	window.deleteItem = function (rowObj, itemid) {
+		console.log(rowObj);
+		var ajaxObj = {
+				url:'calculate.do?method=ajaxDeleteItem',
+				params:{itemid:itemid},
+				method:'post',
+	 	   	   success:function(result,request){
+	 	   	   	  var success = Ext.util.JSON.decode(result.responseText);
+	 	   	   	  if(success) {
+	 	   	   	     var table = document.getElementById("betingTable");
+	 	   	   	     table.children[0].removeChild(rowObj);
+	 	   	   	     initFormulas();
+	 	   	   	  }
+	 	   	   },
+	 	   	   failure:function(result,request){
+	 	   	   	  alert("ERROR:" + result.responseText);
+	 	   	  }
+	 	  };
+	 	  if(window.confirm("您確認要刪除此投注項嗎?")) {
+	 	     Ext.Ajax.request(ajaxObj);
+	 	  }
+	 };
+	 
+	 
     //預計要修正賽事結果
     //window.bodyLoad = function () {
     //    document.getElementById("middlearea").location.href = "/SBP2Web/matchquery.do?method=matchResult&sportsId=1";
@@ -97,6 +294,7 @@ function main() {
 			pattermCheck,
 			regexped, 
 			replaced;
+			
 	    //修正高度
 	    iframeHeight = middlearea.contentDocument.documentElement.scrollHeight;
 	    middlearea.style.height = iframeHeight > 480 ? iframeHeight + 100 + "px" : "480px";
@@ -144,5 +342,4 @@ function setOddsClose(gameType, matchID) {
         imgObj.alt = "詳細賠率";
         openCheck.checked = false;
     }
-} 
-
+}
