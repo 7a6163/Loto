@@ -27,6 +27,7 @@ function main() {
             }
         }
     };
+    
     //複寫原有的顯示全部賠率
     window.oddsChangeAll = function () {
         'use strict';
@@ -70,7 +71,7 @@ function main() {
         }
     };
     
-    
+    //以下是計算機修正
     window.showAllUpCalcDlg = function (matchNum,matchPoolID,combination,poolCode) {
 	    if (poolCode === '') {
 			poolCode = document.getElementById("poolCode").value; //ALL
@@ -157,7 +158,7 @@ function main() {
 	 	   	  }
 	 	  };
 	 	  Ext.Ajax.request(ajaxObj);
-	 }
+	 };
 	 
 	window.setCalcResValue = function (totalBetNumber,singleBetMoney,totalBetMoney,winBetNumber,winBetMoney,payoffMoney) {
 		document.getElementById("td_totalBetNumber").innerHTML=totalBetNumber;
@@ -244,8 +245,7 @@ function main() {
 	 	   	  }
 	 	  };
 	 	  Ext.Ajax.request(ajaxObj);
-	 }
-	 
+	 };
 	 
 	window.deleteItem = function (rowObj, itemid) {
 		console.log(rowObj);
@@ -269,13 +269,66 @@ function main() {
 	 	     Ext.Ajax.request(ajaxObj);
 	 	  }
 	 };
-	 
-	 
-    //預計要修正賽事結果
-    //window.bodyLoad = function () {
-    //    document.getElementById("middlearea").location.href = "/SBP2Web/matchquery.do?method=matchResult&sportsId=1";
-    //}
-}
+	
+	//以下是賽事結果修正
+	window.bodyLoad = function () {
+		var parameter = location.search,
+			patten = /sportsId=\d{1}/gi,
+			regexSport = patten.exec(parameter)[0],
+			sportId;
+			
+		patten = /\d{1}/;
+		sportId = patten.exec(regexSport)[0];
+    	
+    	document.getElementById("middlearea").src = "/SBP2Web/matchquery.do?method=matchResult&sportsId=" + sportId;
+    	window.focus();
+	};
+
+	window.changeMiddlePage = function (url, title1, title2) {
+		if(url !== "") {
+			window.location = url;
+		} else {
+			document.getElementById("middlearea").src = "";
+		}
+	};
+
+	window.changeSportsPage = function(sportsId, url, title1, title2) { 
+		if(sportsId === 3){
+			window.location = "http://sd.i-win.com.tw/";
+		} else {
+			if(url !== ""){
+				window.location = url;
+			} else {
+				document.getElementById("middlearea").src = "";
+			}
+		}
+	};
+
+	window.changeLink = function (menu) {
+		var bsLink = document.getElementById("bsLink");
+		var bkLink = document.getElementById("bkLink");
+		var fbLink = document.getElementById("fbLink");
+		
+		if(bsLink !== null) {
+		var idxbs = bsLink.href.indexOf("menu=");
+		//alert(bsLink.href);
+			bsLink.href = bsLink.href.substring(0,idxbs+5)+menu;
+		//alert(bsLink.href);
+		}
+		if(bkLink !== null) {
+		var idxbk = bkLink.href.indexOf("menu=");
+		//alert(bkLink.href);
+		bkLink.href = bkLink.href.substring(0,idxbk+5)+menu;
+		//alert(bkLink.href);
+		}
+		if(fbLink !== null) {
+		var idxfb = fbLink.href.indexOf("menu=");
+		//alert(fbLink.href);
+		fbLink.href = fbLink.href.substring(0,idxfb+5)+menu;
+		//alert(fbLink.href);
+		}
+	};
+ }
 
 (function() {
 	//解決Chrome 不支援 unsafewindow
