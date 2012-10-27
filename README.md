@@ -1,3 +1,5 @@
+iWin UserScript
+==================================================
 iWin 是為了讓僅支援 IE 的台灣運彩網站，可以支援更多的瀏覽器，並可跨平台，所開發的 UserScript。
 
 [安裝網址](http://userscripts.org/scripts/show/122086)
