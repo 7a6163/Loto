@@ -5,7 +5,7 @@
 // @include         https://bet.i-win.com.tw/SBP2Web/*
 // @include         http://www.i-win.com.tw/*
 // @auther          Zac
-// @version         0.9
+// @version         0.9.8
 // ==/UserScript==
 
 function main() {
